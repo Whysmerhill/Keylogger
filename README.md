@@ -1,8 +1,11 @@
 # Keylogger
 
-### Features
+### Purpose
+Use this tool as an awareness tool.
 
-You cans save the logs either locally in a text file or remotely on a google sheet 
+### Features
+* Save logs either locally in a text file or remotely on a google sheet 
+* Read and register the clipboard
 
 ### Usage
 Launch keylopg.py
