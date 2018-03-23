@@ -12,7 +12,7 @@ import win32event
 import win32api
 import winerror
 import argparse
-import threading
+#import threading
 import time
 
 PATH_LOGS = "keylogs.txt"
